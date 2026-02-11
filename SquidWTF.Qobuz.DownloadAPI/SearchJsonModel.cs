@@ -39,9 +39,9 @@ public class Item
     public string title { get; set; }
     //public int qobuz_id { get; set; }
     //public string version { get; set; }
-    //public string url { get; set; }
+    public string url { get; set; }
     //public string slug { get; set; }
-    //public int duration { get; set; }
+    public int duration { get; set; }
     public bool parental_warning { get; set; }
     //public int popularity { get; set; }
     public int tracks_count { get; set; }
@@ -75,12 +75,12 @@ public class Image
 
 public class Artist
 {
-    public object image { get; set; }
+    //public object image { get; set; }
     public string name { get; set; }
-    public int id { get; set; }
-    public int albums_count { get; set; }
-    public string slug { get; set; }
-    public object picture { get; set; }
+    //public int id { get; set; }
+    //public int albums_count { get; set; }
+    //public string slug { get; set; }
+    //public object picture { get; set; }
 }
 
 public class Label

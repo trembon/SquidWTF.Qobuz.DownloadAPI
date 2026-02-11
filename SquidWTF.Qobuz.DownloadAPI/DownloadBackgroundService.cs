@@ -19,6 +19,8 @@ public class DownloadBackgroundService(IPlaywrightSessionService sessionService)
                 if (session is null)
                     continue;
 
+                session.HasStartedDownloading = true;
+
                 session.Page.Download += async (_, d) =>
                 {
                     await HandleDownload(d, session);

@@ -11,6 +11,7 @@ public sealed class BrowserSession(Guid sessionId, IBrowserContext context, IPag
     public DateTime LastUsed { get; set; } = DateTime.UtcNow;
 
     public bool IsDownloading { get; set; } = false;
+    public bool HasStartedDownloading { get; set; } = false;
     public string? DownloadId { get; set; }
     public string? DownloadFolder { get; set; }
     public int TracksToDownload { get; set; } = 0;

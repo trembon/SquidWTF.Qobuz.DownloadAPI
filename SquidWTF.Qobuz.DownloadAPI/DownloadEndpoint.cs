@@ -27,9 +27,9 @@ public static class DownloadEndpoint
             session.TracksToDownload = albumData.tracks_count;
 
             DownloadBackgroundService.DownloadQueue.Enqueue(downloadId);
-            return Results.Ok(new DownloadEndpointResponseModel(downloadId, true));
+            return Results.Ok(new DownloadEndpointResponseModel(downloadId, session.DownloadFolder));
         });
     }
 }
 
-public record DownloadEndpointResponseModel(string DownloadId, bool Started);
+public record DownloadEndpointResponseModel(string DownloadId, string DownloadFolder);

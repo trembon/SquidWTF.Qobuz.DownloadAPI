@@ -28,7 +28,7 @@ public static class SearchEndpoint
                 SearchEndpointResponseItemModel[] items = [];
                 if (type == "album")
                 {
-                    items = result.data.albums.items.Select(x => new SearchEndpointResponseItemModel(x.id, $"{x.artist.name} - {x.title} ({x.release_date_original[..4]}) ({x.tracks_count} tracks){(x.parental_warning ? " E" : "")}", type)).ToArray();
+                    items = [.. result.data.albums.items.Select(x => new SearchEndpointResponseItemModel(x.id, x.artist.name, x.title, DateTime.Parse(x.release_date_original), x.parental_warning, x.tracks_count, x.duration, x.url, type))];
                 }
 
                 var session = sessions.Save(context, page);
@@ -52,4 +52,4 @@ public static class SearchEndpoint
 }
 
 public record SearchEndpointResponseModel(Guid SessionId, SearchEndpointResponseItemModel[] Items);
-public record SearchEndpointResponseItemModel(string Id, string Title, string Type);
+public record SearchEndpointResponseItemModel(string Id, string Artist, string Album, DateTime ReleaseDate, bool Explicit, int TrackCount, int Duration, string InfoUrl, string Type);

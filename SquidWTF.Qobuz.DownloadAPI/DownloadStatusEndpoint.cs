@@ -12,9 +12,9 @@ public static class DownloadStatusEndpoint
 
             session.LastUsed = DateTime.UtcNow;
 
-            return Results.Ok(new DownloadStatusEndpointResponseModel(session.DownloadedTracks == session.TracksToDownload, session.DownloadedTracks, session.TracksToDownload));
+            return Results.Ok(new DownloadStatusEndpointResponseModel(session.HasStartedDownloading, session.DownloadedTracks == session.TracksToDownload, session.DownloadedTracks, session.TracksToDownload));
         });
     }
 }
 
-public record DownloadStatusEndpointResponseModel(bool Complete, int DownloadedItems, int ItemsToDownload);
+public record DownloadStatusEndpointResponseModel(bool IsDownloading, bool Complete, int DownloadedItems, int ItemsToDownload);
