@@ -1,0 +1,14 @@
+@SquidWTF.Qobuz.DownloadAPI_HostAddress = http://localhost:5123
+
+GET {{SquidWTF.Qobuz.DownloadAPI_HostAddress}}/search/?query=Aqua%20-%20Aquarium&type=album
+Accept: application/json
+
+###
+
+POST {{SquidWTF.Qobuz.DownloadAPI_HostAddress}}/download/?sessionId=d109d9b4-73ec-446f-9c0d-3d486e9c403f&downloadId=0060255720798
+Accept: application/json
+
+###
+
+GET {{SquidWTF.Qobuz.DownloadAPI_HostAddress}}/download/status?downloadId=0060255720798
+Accept: application/json
