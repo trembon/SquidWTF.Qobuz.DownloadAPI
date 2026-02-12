@@ -1,40 +1,62 @@
 ﻿using Microsoft.Playwright;
+using System.Collections.Concurrent;
 
 namespace SquidWTF.Qobuz.DownloadAPI;
 
 public static class SearchEndpoint
 {
+    private static readonly ConcurrentDictionary<string, Guid> searchCache = new();
+
     public static void MapSearchEndpoint(this WebApplication app)
     {
         app.MapGet("/search", async (string query, string type, IPlaywrightSessionService sessions, IConfiguration configuration) =>
         {
+            if (string.IsNullOrWhiteSpace(query))
+                return Results.BadRequest("Invalid query.Cannot be empty.");
+
+            if (type != "album")
+                return Results.BadRequest("Invalid type. Only 'album' is supported.");
+
             IBrowserContext? context = null;
 
             try
             {
-                context = await sessions.CreateContext();
+                SearchJsonModel result;
+                Guid sessionId;
+                if (searchCache.TryGetValue($"{type}|{query}", out var cachedSessionId) && sessions.TryGet(cachedSessionId, out BrowserSession? cachedSession) && cachedSession != null && !cachedSession.IsDownloading)
+                {
+                    sessionId = cachedSessionId;
+                    result = cachedSession.SearchResult!;
+                }
+                else
+                {
+                    context = await sessions.CreateContext();
 
-                var page = await context.NewPageAsync();
-                await page.GotoAsync(configuration["SquidWTF:QobuzUrl"] ?? throw new ArgumentException("SquidWTF QobuzUrl is not set"));
+                    var page = await context.NewPageAsync();
+                    await page.GotoAsync(configuration["SquidWTF:QobuzUrl"] ?? throw new ArgumentException("SquidWTF QobuzUrl is not set"));
 
-                var responseTask = page.WaitForResponseAsync(r => r.Url.Contains("/api/get-music") && r.Status == 200);
+                    var responseTask = page.WaitForResponseAsync(r => r.Url.Contains("/api/get-music") && r.Status == 200);
 
-                await page.FillAsync("#search", query);
-                await page.Locator("svg.lucide-arrow-right").Locator("xpath=..").ClickAsync();
+                    await page.FillAsync("#search", query);
+                    await page.Locator("svg.lucide-arrow-right").Locator("xpath=..").ClickAsync();
 
-                var response = await responseTask;
-                var result = await response.JsonAsync<SearchJsonModel>();
+                    var response = await responseTask;
+                    result = await response.JsonAsync<SearchJsonModel>();
+
+                    var session = sessions.Save(context, page);
+                    sessionId = session.Id;
+                    session.SearchResult = result;
+
+                    searchCache.TryAdd($"{type}|{query}", session.Id);
+                }
 
                 SearchEndpointResponseItemModel[] items = [];
                 if (type == "album")
                 {
-                    items = [.. result.data.albums.items.Select(x => new SearchEndpointResponseItemModel(x.id, x.artist.name, x.title, DateTime.Parse(x.release_date_original), x.parental_warning, x.tracks_count, x.duration, x.url, type))];
+                    items = [.. result.data.albums.items.Select(x => new SearchEndpointResponseItemModel(x.id, x.artist.name, x.title, DateTime.Parse(x.release_date_original), x.parental_warning, x.tracks_count, x.duration, x.url.Replace("/fr-fr/", "/us-en/"), type))];
                 }
 
-                var session = sessions.Save(context, page);
-                session.SearchResult = result;
-
-                return Results.Ok(new SearchEndpointResponseModel(session.Id, items));
+                return Results.Ok(new SearchEndpointResponseModel(sessionId, items));
             }
             catch (Exception ex)
             {

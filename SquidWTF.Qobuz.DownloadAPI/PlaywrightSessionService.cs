@@ -8,6 +8,7 @@ public interface IPlaywrightSessionService
     Task<IBrowserContext> CreateContext();
     BrowserSession Save(IBrowserContext context, IPage page);
     BrowserSession? Get(Guid sessionId);
+    bool TryGet(Guid sessionId, out BrowserSession? session);
     BrowserSession? GetByDownloadId(string downloadId);
     List<BrowserSession> GetAll();
     Task Cleanup(Guid sessionId);
@@ -58,6 +59,12 @@ public class PlaywrightSessionService : IPlaywrightSessionService
             session.LastUsed = DateTime.UtcNow;
 
         return session;
+    }
+
+    public bool TryGet(Guid sessionId, out BrowserSession? session)
+    {
+        session = Get(sessionId);
+        return session is not null;
     }
 
     public BrowserSession? GetByDownloadId(string downloadId)
