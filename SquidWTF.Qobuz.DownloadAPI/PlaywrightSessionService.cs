@@ -13,11 +13,12 @@ public interface IPlaywrightSessionService
     List<BrowserSession> GetAll();
     Task Cleanup(Guid sessionId);
     Task Remove(Guid sessionId);
+    Task Reset();
 }
 
 public class PlaywrightSessionService : IPlaywrightSessionService
 {
-    private readonly IBrowser? browser;
+    private IBrowser? browser;
     private readonly ConcurrentDictionary<Guid, BrowserSession> sessions = [];
 
     private async Task<IBrowser> GetBrowser()
@@ -27,11 +28,13 @@ public class PlaywrightSessionService : IPlaywrightSessionService
 
         var playwright = await Playwright.CreateAsync();
 
-        return await playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions
+        browser = await playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions
         {
             Headless = true,
             Args = ["--no-sandbox", "--disable-dev-shm-usage"]
         });
+
+        return browser;
     }
 
     public async Task<IBrowserContext> CreateContext()
@@ -97,6 +100,22 @@ public class PlaywrightSessionService : IPlaywrightSessionService
             {
                 // Ignore exceptions during cleanup
             }
+        }
+    }
+
+    public async Task Reset()
+    {
+        var localBrowser = browser;
+        browser = null;
+
+        if (localBrowser != null)
+        {
+            try
+            {
+                await localBrowser.CloseAsync();
+                await localBrowser.DisposeAsync();
+            }
+            catch { }
         }
     }
 }

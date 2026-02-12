@@ -9,7 +9,11 @@ public class PlaywrightSessionCleanupService(IPlaywrightSessionService playwrigh
     {
         while (!stoppingToken.IsCancellationRequested)
         {
-            foreach (var session in playwrightSessionService.GetAll())
+            var sessions = playwrightSessionService.GetAll().ToList();
+            if (sessions.Count == 0)
+                await playwrightSessionService.Reset();
+
+            foreach (var session in sessions)
             {
                 if (DateTime.UtcNow - session.LastUsed > _timeout)
                 {
