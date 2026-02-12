@@ -23,11 +23,12 @@ public static class DownloadEndpoint
             session.IsDownloading = true;
             session.DownloadId = downloadId;
 
-            session.DownloadFolder = Path.Combine(configuration["Downloads:RootFolder"] ?? throw new ArgumentException("Download root folder is not set"), $"{albumData.artist.name} - {albumData.title} ({albumData.release_date_original[..4]}){(albumData.parental_warning ? " E" : "")}");
+            string folderName = $"{albumData.artist.name} - {albumData.title} ({albumData.release_date_original[..4]}){(albumData.parental_warning ? " E" : "")}";
+            session.DownloadFolder = Path.Combine(configuration["Downloads:RootFolder"] ?? throw new ArgumentException("Download root folder is not set"), folderName);
             session.TracksToDownload = albumData.tracks_count;
 
             DownloadBackgroundService.DownloadQueue.Enqueue(downloadId);
-            return Results.Ok(new DownloadEndpointResponseModel(downloadId, session.DownloadFolder));
+            return Results.Ok(new DownloadEndpointResponseModel(downloadId, folderName));
         });
     }
 }
