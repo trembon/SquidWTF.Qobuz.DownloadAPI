@@ -60,7 +60,8 @@ public class DownloadBackgroundService(IPlaywrightSessionService sessionService)
     private static readonly Lock updateDownloadedTrackLock = new();
     private static async Task HandleDownload(IDownload download, BrowserSession session)
     {
-        await download.SaveAsAsync(Path.Combine(session.DownloadFolder!, download.SuggestedFilename));
+        string sanatizedFilename = Helpers.SanitizeNameForFileSystem(download.SuggestedFilename);
+        await download.SaveAsAsync(Path.Combine(session.DownloadFolder!, sanatizedFilename));
         lock (updateDownloadedTrackLock)
         {
             session.LastUsed = DateTime.UtcNow;
