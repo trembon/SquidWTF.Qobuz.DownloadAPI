@@ -48,6 +48,13 @@ public class DownloadBackgroundService(IPlaywrightSessionService sessionService)
                     await Task.Delay(500, stoppingToken);
                     if (session.DownloadedTracks == session.TracksToDownload)
                         break;
+
+                    if (DateTime.UtcNow - session.LastUsed > TimeSpan.FromMinutes(1))
+                    {
+                        // If we haven't made progress in the last minute, assume something went wrong and stop waiting
+                        session.TracksToDownload = session.DownloadedTracks; // This will cause the loop to exit
+                        break;
+                    }
                 }
 
                 await sessionService.Cleanup(session.Id);
