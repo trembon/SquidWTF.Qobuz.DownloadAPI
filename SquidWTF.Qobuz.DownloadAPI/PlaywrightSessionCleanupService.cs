@@ -3,7 +3,7 @@
 public class PlaywrightSessionCleanupService(IPlaywrightSessionService playwrightSessionService) : BackgroundService
 {
     private readonly TimeSpan _timeout = TimeSpan.FromMinutes(10);
-    private readonly TimeSpan _interval = TimeSpan.FromMinutes(1);
+    private readonly TimeSpan _interval = TimeSpan.FromMinutes(2);
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {

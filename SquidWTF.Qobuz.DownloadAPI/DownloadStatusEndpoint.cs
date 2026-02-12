@@ -10,8 +10,6 @@ public static class DownloadStatusEndpoint
             if (session is null || !session.IsDownloading)
                 return Results.NotFound();
 
-            session.LastUsed = DateTime.UtcNow;
-
             return Results.Ok(new DownloadStatusEndpointResponseModel(session.HasStartedDownloading, session.DownloadedTracks == session.TracksToDownload, session.DownloadedTracks, session.TracksToDownload));
         });
     }
